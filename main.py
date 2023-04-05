@@ -1,34 +1,32 @@
-from sqlalchemy import (
-    create_engine,
-    select,
-    Table,
-    Column,
-    Integer,
-    String,
-    MetaData,
-    ForeignKey,
-)
+from sqlalchemy import create_engine, MetaData, Table
+from sqlalchemy.orm import mapper, relationship, sessionmaker
 
+engine = create_engine("test", echo=True)
 meta = MetaData()
 
-authors = Table(
-    "Authors",
-    meta,
-    Column("id_author", Integer, primary_key=True),
-    Column("name", String(250), nullable=False),
-)
+authors = Table("Authors", meta, autoload=True)
+books = Table("Books", meta, autoload=True)
 
-books = Table(
-    "Books",
-    meta,
-    Column("id_book", Integer, primary_key=True),
-    Column("title", String(250), nullable=False),
-    Column("author_id", Integer, ForeignKey("Author.id_author")),
-    Column("genre", String(250)),
-    Column("proce", Integer),
-)
 
-engine = create_engine("mysql+mysqlconnector://root:root@localhost/testdb", echo=True)
-conn = engine.connect()
+class Book:
+    def __init__(self, title, author_id, genre, price):
+        self.title = title
+        self.author_id = author_id
+        self.genre = genre
+        self.price = price
 
-query = books.insert().values(title="test", price=999)
+
+class Author:
+    def __init__(self, name):
+        self.name = name
+
+
+mapper(Book, books)
+mapper(Author, authors)
+
+new_book = Book("NewBook", 1, "New6", 2500)
+
+DBSession = sessionmaker(bind=engine)
+session = DBSession()
+session.add(new_book)
+session.commit()
