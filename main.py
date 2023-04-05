@@ -30,3 +30,5 @@ DBSession = sessionmaker(bind=engine)
 session = DBSession()
 session.add(new_book)
 session.commit()
+
+query = session.query(Book, Author).where(Book.author_id == Author.id_author)
